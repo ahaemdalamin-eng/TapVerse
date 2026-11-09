@@ -2,45 +2,86 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>TapVerse</title>
 <style>
 body {
   background: #101827;
   color: white;
-  font-family: Arial, sans-serif;
+  font-family: Arial;
   text-align: center;
-  padding: 30px 15px;
+  padding: 25px 15px;
 }
 h1 { color: #38e8b0; }
-.coins { font-size: 35px; margin: 25px; }
+.coins { font-size: 32px; margin: 20px; }
+.energy {
+  background: #263449;
+  border-radius: 20px;
+  padding: 10px;
+  margin: 20px auto;
+  max-width: 300px;
+}
+.bar {
+  background: #38e8b0;
+  height: 12px;
+  border-radius: 10px;
+  width: 100%;
+}
 button {
   background: #38e8b0;
   color: #101827;
   border: none;
   border-radius: 15px;
-  padding: 20px 45px;
-  font-size: 23px;
+  padding: 18px 40px;
+  font-size: 22px;
   font-weight: bold;
 }
 </style>
 </head>
 <body>
+
 <h1>TapVerse</h1>
 <p>Tap and collect coins!</p>
+
 <div class="coins">🪙 <span id="coins">0</span></div>
+
+<div class="energy">
+  ⚡ Energy: <span id="energy">100</span>/100
+  <div class="bar" id="bar"></div>
+</div>
+
 <button onclick="tap()">TAP ME</button>
 
 <script>
 let coins = Number(localStorage.getItem("tapverse_coins")) || 0;
+let energy = Number(localStorage.getItem("tapverse_energy"));
+if (localStorage.getItem("tapverse_energy") === null) energy = 100;
 
-document.getElementById("coins").innerText = coins;
+function update() {
+  document.getElementById("coins").innerText = coins;
+  document.getElementById("energy").innerText = energy;
+  document.getElementById("bar").style.width = energy + "%";
+}
 
 function tap() {
+  if (energy <= 0) return;
   coins++;
-  document.getElementById("coins").innerText = coins;
+  energy--;
   localStorage.setItem("tapverse_coins", coins);
+  localStorage.setItem("tapverse_energy", energy);
+  update();
 }
+
+setInterval(() => {
+  if (energy < 100) {
+    energy = Math.min(100, energy + 1);
+    localStorage.setItem("tapverse_energy", energy);
+    update();
+  }
+}, 1000);
+
+update();
 </script>
+
 </body>
 </html>
