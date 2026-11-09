@@ -1,17 +1,100 @@
-<div class="bottom">
-  <div onclick="openExchange()">
-    <b>🏦</b>Exchange
-  </div>
+<div id="exchangeForm">
+  <h3>💰 Withdraw Center</h3>
 
-  <div onclick="openMine()">
-    <b>⛏️</b>Mine
-  </div>
+  <input id="payNumber"
+    type="tel"
+    placeholder="Enter bKash / Nagad number"
+    style="width:100%;padding:14px;margin:10px 0;border-radius:10px;">
 
-  <div onclick="openFriends()">
-    <b>👥</b>Friends
-  </div>
+  <input id="payAmount"
+    type="number"
+    placeholder="Enter coins (Minimum 1000)"
+    style="width:100%;padding:14px;margin:10px 0;border-radius:10px;">
 
-  <div onclick="openEarn()">
-    <b>🎁</b>Earn
-  </div>
+  <button onclick="submitWithdraw()"
+    style="width:100%;padding:14px;background:#b5ff54;border:0;border-radius:10px;font-weight:bold;">
+    Submit Withdraw
+  </button>
+
+  <h3 style="margin-top:25px;">📜 Withdraw History</h3>
+  <div id="withdrawHistory">No requests yet</div>
 </div>
+
+<script>
+let selectedPayment = "";
+
+function chooseExchange(method) {
+  selectedPayment = method;
+
+  document.getElementById("exchangeForm").innerHTML = `
+    <h3>${method} Withdraw</h3>
+
+    <input id="payNumber" type="tel"
+      placeholder="Enter ${method} number"
+      style="width:100%;padding:14px;margin:10px 0;">
+
+    <input id="payAmount" type="number"
+      placeholder="Minimum 1000 coins"
+      style="width:100%;padding:14px;margin:10px 0;">
+
+    <button onclick="submitWithdraw()"
+      style="width:100%;padding:14px;background:#b5ff54;border:0;border-radius:10px;">
+      Submit Withdraw
+    </button>
+
+    <h3 style="margin-top:20px;">📜 Withdraw History</h3>
+    <div id="withdrawHistory"></div>
+  `;
+
+  showHistory();
+}
+
+function submitWithdraw() {
+  let number = document.getElementById("payNumber").value.trim();
+  let amount = Number(document.getElementById("payAmount").value);
+
+  if (!/^[0-9]{11}$/.test(number)) {
+    alert("Enter a valid 11-digit number!");
+    return;
+  }
+
+  if (amount < 1000 || !Number.isFinite(amount)) {
+    alert("Minimum withdraw is 1000 coins!");
+    return;
+  }
+
+  let history = JSON.parse(
+    localStorage.getItem("withdrawHistory") || "[]"
+  );
+
+  history.unshift({
+    method: selectedPayment,
+    amount: amount,
+    status: "Demo Pending",
+    date: new Date().toLocaleString()
+  });
+
+  localStorage.setItem("withdrawHistory",
+    JSON.stringify(history));
+
+  alert("Demo request submitted!");
+
+  showHistory();
+}
+
+function showHistory() {
+  let history = JSON.parse(
+    localStorage.getItem("withdrawHistory") || "[]"
+  );
+
+  document.getElementById("withdrawHistory").innerHTML =
+    history.length
+    ? history.map(item =>
+      `<p style="padding:10px;background:#242e42;margin:8px 0;border-radius:8px;">
+        ${item.method} — ${item.amount} Coins<br>
+        ${item.status}<br>${item.date}
+      </p>`
+    ).join("")
+    : "No requests yet";
+}
+</script>
