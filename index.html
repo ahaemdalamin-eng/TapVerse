@@ -1,61 +1,17 @@
-<style>
-.exchange-page {
-  display:none;
-  background:#151b29;
-  color:white;
-  padding:20px;
-  border-radius:18px;
-}
-.exchange-option {
-  padding:20px;
-  border-radius:15px;
-  margin-top:15px;
-  text-align:center;
-  font-weight:bold;
-  font-size:20px;
-  color:white;
-}
-</style>
-
-<div id="exchangePage" class="exchange-page">
-  <h2>💰 Exchange Center</h2>
-  <p>Choose your payment method</p>
-
-  <div class="exchange-option" style="background:#e2136e"
-  onclick="chooseExchange('bKash')">
-    bKash
+<div class="bottom">
+  <div onclick="openExchange()">
+    <b>🏦</b>Exchange
   </div>
 
-  <div class="exchange-option" style="background:#f58220"
-  onclick="chooseExchange('Nagad')">
-    Nagad
+  <div onclick="openMine()">
+    <b>⛏️</b>Mine
   </div>
 
-  <div id="exchangeForm"></div>
+  <div onclick="openFriends()">
+    <b>👥</b>Friends
+  </div>
 
-  <button onclick="closeExchange()">⬅ Back</button>
+  <div onclick="openEarn()">
+    <b>🎁</b>Earn
+  </div>
 </div>
-
-<script>
-function openExchange(){
-  document.getElementById("exchangePage").style.display="block";
-}
-
-function closeExchange(){
-  document.getElementById("exchangePage").style.display="none";
-}
-
-function chooseExchange(method){
-  document.getElementById("exchangeForm").innerHTML=`
-    <h3 style="margin-top:20px">${method} Withdraw</h3>
-    <input id="payNumber" placeholder="Enter number"
-    style="padding:13px;width:100%;margin:12px 0">
-    <input id="payAmount" type="number"
-    placeholder="Enter coins"
-    style="padding:13px;width:100%">
-    <button onclick="alert('Demo only. Payment is not connected.')">
-    Continue
-    </button>
-  `;
-}
-</script>
