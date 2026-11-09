@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TapVerse</title>
+<style>
+body {
+  background: #101827;
+  color: white;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 30px 15px;
+}
+h1 { color: #38e8b0; }
+.coins { font-size: 35px; margin: 25px; }
+button {
+  background: #38e8b0;
+  color: #101827;
+  border: none;
+  border-radius: 15px;
+  padding: 20px 45px;
+  font-size: 23px;
+  font-weight: bold;
+}
+</style>
+</head>
+<body>
+<h1>TapVerse</h1>
+<p>Tap and collect coins!</p>
+<div class="coins">🪙 <span id="coins">0</span></div>
+<button onclick="tap()">TAP ME</button>
+<script>
+let coins = 0;
+function tap() {
+  coins++;
+  document.getElementById("coins").innerText = coins;
+}
+</script>
+</body>
+</html>
