@@ -30,11 +30,16 @@ button {
 <p>Tap and collect coins!</p>
 <div class="coins">🪙 <span id="coins">0</span></div>
 <button onclick="tap()">TAP ME</button>
+
 <script>
-let coins = 0;
+let coins = Number(localStorage.getItem("tapverse_coins")) || 0;
+
+document.getElementById("coins").innerText = coins;
+
 function tap() {
   coins++;
   document.getElementById("coins").innerText = coins;
+  localStorage.setItem("tapverse_coins", coins);
 }
 </script>
 </body>
