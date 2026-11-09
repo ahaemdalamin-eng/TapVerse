@@ -2,19 +2,19 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TapVerse</title>
 <style>
 body {
   background: #101827;
   color: white;
-  font-family: Arial;
+  font-family: Arial, sans-serif;
   text-align: center;
   padding: 25px 15px;
 }
 h1 { color: #38e8b0; }
 .coins { font-size: 32px; margin: 20px; }
-.energy {
+.energy-box {
   background: #263449;
   border-radius: 20px;
   padding: 10px;
@@ -22,20 +22,30 @@ h1 { color: #38e8b0; }
   max-width: 300px;
 }
 .bar {
+  background: #111827;
+  height: 15px;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+#energyBar {
   background: #38e8b0;
-  height: 12px;
-  border-radius: 10px;
+  height: 100%;
   width: 100%;
 }
 button {
+  border: none;
+  border-radius: 14px;
+  padding: 15px 30px;
+  margin: 10px;
+  font-size: 18px;
+  font-weight: bold;
   background: #38e8b0;
   color: #101827;
-  border: none;
-  border-radius: 15px;
-  padding: 18px 40px;
-  font-size: 22px;
-  font-weight: bold;
 }
+button:disabled { opacity: 0.5; }
+.upgrade { background: #f5c542; }
+.info { margin: 15px; font-size: 17px; }
 </style>
 </head>
 <body>
@@ -45,37 +55,72 @@ button {
 
 <div class="coins">🪙 <span id="coins">0</span></div>
 
-<div class="energy">
+<div class="energy-box">
   ⚡ Energy: <span id="energy">100</span>/100
-  <div class="bar" id="bar"></div>
+  <div class="bar"><div id="energyBar"></div></div>
 </div>
 
-<button onclick="tap()">TAP ME</button>
+<button id="tapButton" onclick="tap()">TAP ME</button>
+
+<div class="info">Upgrade Level: <span id="level">0</span></div>
+<div class="info">Coins per tap: <span id="power">1</span></div>
+<div class="info">Upgrade Cost: 🪙 <span id="cost">50</span></div>
+
+<button class="upgrade" onclick="upgrade()">UPGRADE</button>
 
 <script>
 let coins = Number(localStorage.getItem("tapverse_coins")) || 0;
-let energy = Number(localStorage.getItem("tapverse_energy"));
-if (localStorage.getItem("tapverse_energy") === null) energy = 100;
+let savedEnergy = localStorage.getItem("tapverse_energy");
+let energy = savedEnergy === null ? 100 : Number(savedEnergy);
+let level = Number(localStorage.getItem("tapverse_upgrade")) || 0;
+
+const maxEnergy = 100;
+
+function upgradeCost() {
+  return 50 * Math.pow(2, level);
+}
 
 function update() {
   document.getElementById("coins").innerText = coins;
   document.getElementById("energy").innerText = energy;
-  document.getElementById("bar").style.width = energy + "%";
+  document.getElementById("level").innerText = level;
+  document.getElementById("power").innerText = level + 1;
+  document.getElementById("cost").innerText = upgradeCost();
+  document.getElementById("energyBar").style.width = energy + "%";
+  document.getElementById("tapButton").disabled = energy <= 0;
+}
+
+function save() {
+  localStorage.setItem("tapverse_coins", coins);
+  localStorage.setItem("tapverse_energy", energy);
+  localStorage.setItem("tapverse_upgrade", level);
 }
 
 function tap() {
   if (energy <= 0) return;
-  coins++;
+  coins += level + 1;
   energy--;
-  localStorage.setItem("tapverse_coins", coins);
-  localStorage.setItem("tapverse_energy", energy);
+  save();
   update();
 }
 
-setInterval(() => {
-  if (energy < 100) {
-    energy = Math.min(100, energy + 1);
-    localStorage.setItem("tapverse_energy", energy);
+function upgrade() {
+  let cost = upgradeCost();
+  if (coins < cost) {
+    alert("Not enough coins!");
+    return;
+  }
+  coins -= cost;
+  level++;
+  save();
+  update();
+  alert("Upgrade successful!");
+}
+
+setInterval(function() {
+  if (energy < maxEnergy) {
+    energy++;
+    save();
     update();
   }
 }, 1000);
