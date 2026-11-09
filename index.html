@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TapVerse</title>
-
 <style>
 body {
   background: #101827;
@@ -47,10 +46,20 @@ button {
 button:disabled { opacity: 0.5; }
 .upgrade { background: #f5c542; }
 .reward { background: #b99aff; }
+.invite { background: #67b7ff; }
+.redeem { background: #ff9c70; }
+input {
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  width: 75%;
+  max-width: 260px;
+  font-size: 16px;
+  text-align: center;
+}
 .info { margin: 15px; font-size: 17px; }
 </style>
 </head>
-
 <body>
 
 <h1>TapVerse</h1>
@@ -60,42 +69,52 @@ button:disabled { opacity: 0.5; }
 
 <div class="energy-box">
   ⚡ Energy: <span id="energy">100</span>/100
-  <div class="bar">
-    <div id="energyBar"></div>
-  </div>
+  <div class="bar"><div id="energyBar"></div></div>
 </div>
 
 <button id="tapButton" onclick="tap()">TAP ME</button>
 
-<div class="info">
-  Upgrade Level: <span id="level">0</span>
-</div>
-<div class="info">
-  Coins per tap: <span id="power">1</span>
-</div>
-<div class="info">
-  Upgrade Cost: 🪙 <span id="cost">50</span>
-</div>
-
+<div class="info">Upgrade Level: <span id="level">0</span></div>
+<div class="info">Coins per tap: <span id="power">1</span></div>
+<div class="info">Upgrade Cost: 🪙 <span id="cost">50</span></div>
 <button class="upgrade" onclick="upgrade()">UPGRADE</button>
 
+<hr>
+
 <div class="info">🎁 Daily Bonus: 100 Coins</div>
-<button class="reward" id="rewardButton" onclick="claimReward()">
-  CLAIM REWARD
-</button>
+<button class="reward" id="rewardButton" onclick="claimReward()">CLAIM REWARD</button>
 <p id="rewardMessage"></p>
+
+<hr>
+
+<h2>👥 Invite Friends</h2>
+<p>Share TapVerse with your friends!</p>
+<button class="invite" onclick="shareApp()">SHARE APP</button>
+<button class="invite" onclick="copyLink()">COPY APP LINK</button>
+<p id="inviteMessage"></p>
+
+<hr>
+
+<h2>🎟️ Redeem Code</h2>
+<p>Enter your reward code below</p>
+<input id="redeemInput" type="text" placeholder="Enter Code">
+<br>
+<button class="redeem" onclick="redeemCode()">REDEEM</button>
+<p id="redeemMessage"></p>
 
 <script>
 let coins = Number(localStorage.getItem("tapverse_coins")) || 0;
-
 let savedEnergy = localStorage.getItem("tapverse_energy");
 let energy = savedEnergy === null ? 100 : Number(savedEnergy);
-
 let level = Number(localStorage.getItem("tapverse_upgrade")) || 0;
-
 let lastReward = localStorage.getItem("tapverse_daily_reward") || "";
 
+let usedCodes = JSON.parse(
+  localStorage.getItem("tapverse_used_codes") || "[]"
+);
+
 const maxEnergy = 100;
+const appLink = "https://ahaemdalamin-eng.github.io/TapVerse/";
 
 function today() {
   let d = new Date();
@@ -112,6 +131,8 @@ function save() {
   localStorage.setItem("tapverse_energy", energy);
   localStorage.setItem("tapverse_upgrade", level);
   localStorage.setItem("tapverse_daily_reward", lastReward);
+  localStorage.setItem("tapverse_used_codes",
+    JSON.stringify(usedCodes));
 }
 
 function update() {
@@ -120,17 +141,11 @@ function update() {
   document.getElementById("level").innerText = level;
   document.getElementById("power").innerText = level + 1;
   document.getElementById("cost").innerText = upgradeCost();
-
-  document.getElementById("energyBar").style.width =
-    energy + "%";
-
-  document.getElementById("tapButton").disabled =
-    energy <= 0;
+  document.getElementById("energyBar").style.width = energy + "%";
+  document.getElementById("tapButton").disabled = energy <= 0;
 
   let claimed = lastReward === today();
-
   document.getElementById("rewardButton").disabled = claimed;
-
   document.getElementById("rewardMessage").innerText =
     claimed ? "Today's reward already claimed!" :
     "Your daily reward is ready!";
@@ -138,25 +153,20 @@ function update() {
 
 function tap() {
   if (energy <= 0) return;
-
   coins += level + 1;
   energy--;
-
   save();
   update();
 }
 
 function upgrade() {
   let cost = upgradeCost();
-
   if (coins < cost) {
     alert("Not enough coins!");
     return;
   }
-
   coins -= cost;
   level++;
-
   save();
   update();
   alert("Upgrade successful!");
@@ -164,13 +174,70 @@ function upgrade() {
 
 function claimReward() {
   if (lastReward === today()) return;
-
   coins += 100;
   lastReward = today();
-
   save();
   update();
   alert("100 Coins added!");
+}
+
+function redeemCode() {
+  let input = document.getElementById("redeemInput");
+  let code = input.value.trim().toUpperCase();
+  let message = document.getElementById("redeemMessage");
+
+  const rewards = {
+    "TAP100": 100,
+    "TAP500": 500
+  };
+
+  if (!code) {
+    message.innerText = "Please enter a code!";
+    return;
+  }
+
+  if (!rewards[code]) {
+    message.innerText = "Invalid code!";
+    return;
+  }
+
+  if (usedCodes.includes(code)) {
+    message.innerText = "This code was already used!";
+    return;
+  }
+
+  coins += rewards[code];
+  usedCodes.push(code);
+  save();
+  update();
+
+  message.innerText = rewards[code] + " Coins added successfully!";
+  input.value = "";
+}
+
+async function shareApp() {
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: "TapVerse",
+        text: "Try TapVerse!",
+        url: appLink
+      });
+    } catch (error) {}
+  } else {
+    copyLink();
+  }
+}
+
+async function copyLink() {
+  try {
+    await navigator.clipboard.writeText(appLink);
+    document.getElementById("inviteMessage").innerText =
+      "App link copied!";
+  } catch (error) {
+    document.getElementById("inviteMessage").innerText =
+      "Copy this link: " + appLink;
+  }
 }
 
 setInterval(function() {
