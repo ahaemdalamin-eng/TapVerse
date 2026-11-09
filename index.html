@@ -1,154 +1,61 @@
 <style>
-.mine-page {
+.exchange-page {
+  display:none;
   background:#151b29;
   color:white;
   padding:20px;
   border-radius:18px;
-  font-family:Arial;
 }
-.mine-card {
-  background:#242e42;
-  padding:17px;
-  border-radius:14px;
-  margin:13px 0;
-}
-.mine-card h3 {margin-bottom:12px;}
-.mine-green {color:#b5ff54;}
-.mine-btn {
-  width:100%;
-  padding:14px;
-  border:0;
-  border-radius:12px;
-  background:#b5ff54;
-  color:#111;
+.exchange-option {
+  padding:20px;
+  border-radius:15px;
+  margin-top:15px;
+  text-align:center;
   font-weight:bold;
-  margin-top:12px;
-}
-.mine-history {
-  font-size:13px;
-  color:#ccc;
-  margin-top:9px;
+  font-size:20px;
+  color:white;
 }
 </style>
 
-<div class="mine-page">
-  <h2>⛏️ Mine Center</h2>
-  <p class="mine-green">Your Mining Dashboard</p>
+<div id="exchangePage" class="exchange-page">
+  <h2>💰 Exchange Center</h2>
+  <p>Choose your payment method</p>
 
-  <div class="mine-card">
-    <p>Total Mining Coins</p>
-    <h1 class="mine-green" id="mineCoins">0</h1>
+  <div class="exchange-option" style="background:#e2136e"
+  onclick="chooseExchange('bKash')">
+    bKash
   </div>
 
-  <div class="mine-card">
-    <h3>⚡ Mining Power</h3>
-    <h2 id="minePower">100</h2>
-    <p>Coins per hour</p>
-    <button class="mine-btn" onclick="upgradeMine()">
-      🚀 Upgrade Power (1000 Coins)
-    </button>
+  <div class="exchange-option" style="background:#f58220"
+  onclick="chooseExchange('Nagad')">
+    Nagad
   </div>
 
-  <div class="mine-card">
-    <h3>⛏️ Start Mining</h3>
-    <p id="mineStatus">Mining is stopped</p>
-    <button class="mine-btn" onclick="startMine()">
-      START MINING
-    </button>
-    <button class="mine-btn" onclick="collectMine()">
-      COLLECT COINS
-    </button>
-  </div>
+  <div id="exchangeForm"></div>
 
-  <div class="mine-card">
-    <h3>🎁 Daily Mining Bonus</h3>
-    <p>Claim 500 bonus coins</p>
-    <button class="mine-btn" onclick="mineBonus()">
-      CLAIM BONUS
-    </button>
-  </div>
-
-  <div class="mine-card">
-    <h3>📊 Mining History</h3>
-    <div id="mineHistory">No history yet</div>
-  </div>
+  <button onclick="closeExchange()">⬅ Back</button>
 </div>
 
 <script>
-let mc = Number(localStorage.getItem("mc")) || 0;
-let mp = Number(localStorage.getItem("mp")) || 100;
-let ms = Number(localStorage.getItem("ms")) || 0;
-
-function mineSave(){
-  localStorage.setItem("mc",mc);
-  localStorage.setItem("mp",mp);
-  localStorage.setItem("ms",ms);
-  document.getElementById("mineCoins").innerText =
-    mc.toLocaleString();
-  document.getElementById("minePower").innerText = mp;
-  document.getElementById("mineStatus").innerText =
-    ms ? "Mining is running 🟢" : "Mining is stopped";
+function openExchange(){
+  document.getElementById("exchangePage").style.display="block";
 }
 
-function mineLog(message){
-  let h = document.getElementById("mineHistory");
-  let old = localStorage.getItem("mineLog") || "";
-  old = message + "<br>" + old;
-  localStorage.setItem("mineLog",old);
-  h.innerHTML = old;
+function closeExchange(){
+  document.getElementById("exchangePage").style.display="none";
 }
 
-function startMine(){
-  if(ms){
-    alert("Mining already started!");
-    return;
-  }
-  ms = Date.now();
-  mineSave();
-  mineLog("⛏️ Mining started");
+function chooseExchange(method){
+  document.getElementById("exchangeForm").innerHTML=`
+    <h3 style="margin-top:20px">${method} Withdraw</h3>
+    <input id="payNumber" placeholder="Enter number"
+    style="padding:13px;width:100%;margin:12px 0">
+    <input id="payAmount" type="number"
+    placeholder="Enter coins"
+    style="padding:13px;width:100%">
+    <button onclick="alert('Demo only. Payment is not connected.')">
+    Continue
+    </button>
+  `;
 }
-
-function collectMine(){
-  if(!ms){
-    alert("Start mining first!");
-    return;
-  }
-  let earned = Math.floor((Date.now()-ms)*mp/3600000);
-  if(earned <= 0){
-    alert("Wait a little longer!");
-    return;
-  }
-  mc += earned;
-  ms = Date.now();
-  mineSave();
-  mineLog("+" + earned + " coins collected");
-}
-
-function upgradeMine(){
-  if(mc < 1000){
-    alert("Need 1000 mining coins!");
-    return;
-  }
-  mc -= 1000;
-  mp += 50;
-  mineSave();
-  mineLog("⚡ Mining power upgraded");
-}
-
-function mineBonus(){
-  let today = new Date().toDateString();
-  if(localStorage.getItem("mineBonusDate") === today){
-    alert("Today's bonus already claimed!");
-    return;
-  }
-  mc += 500;
-  localStorage.setItem("mineBonusDate",today);
-  mineSave();
-  mineLog("🎁 500 bonus coins claimed");
-}
-
-document.getElementById("mineHistory").innerHTML =
-  localStorage.getItem("mineLog") || "No history yet";
-
-mineSave();
 </script>
