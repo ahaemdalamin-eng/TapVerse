@@ -1,9 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TapVerse</title>
+
 <style>
 body {
   background: #101827;
@@ -17,7 +19,7 @@ h1 { color: #38e8b0; }
 .energy-box {
   background: #263449;
   border-radius: 20px;
-  padding: 10px;
+  padding: 12px;
   margin: 20px auto;
   max-width: 300px;
 }
@@ -36,18 +38,20 @@ h1 { color: #38e8b0; }
 button {
   border: none;
   border-radius: 14px;
-  padding: 15px 30px;
+  padding: 15px 25px;
   margin: 10px;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: bold;
   background: #38e8b0;
   color: #101827;
 }
 button:disabled { opacity: 0.5; }
 .upgrade { background: #f5c542; }
+.reward { background: #b99aff; }
 .info { margin: 15px; font-size: 17px; }
 </style>
 </head>
+
 <body>
 
 <h1>TapVerse</h1>
@@ -57,27 +61,58 @@ button:disabled { opacity: 0.5; }
 
 <div class="energy-box">
   ⚡ Energy: <span id="energy">100</span>/100
-  <div class="bar"><div id="energyBar"></div></div>
+  <div class="bar">
+    <div id="energyBar"></div>
+  </div>
 </div>
 
 <button id="tapButton" onclick="tap()">TAP ME</button>
 
-<div class="info">Upgrade Level: <span id="level">0</span></div>
-<div class="info">Coins per tap: <span id="power">1</span></div>
-<div class="info">Upgrade Cost: 🪙 <span id="cost">50</span></div>
+<div class="info">
+  Upgrade Level: <span id="level">0</span>
+</div>
+<div class="info">
+  Coins per tap: <span id="power">1</span>
+</div>
+<div class="info">
+  Upgrade Cost: 🪙 <span id="cost">50</span>
+</div>
 
 <button class="upgrade" onclick="upgrade()">UPGRADE</button>
 
+<div class="info">🎁 Daily Bonus: 100 Coins</div>
+<button class="reward" id="rewardButton" onclick="claimReward()">
+  CLAIM REWARD
+</button>
+<p id="rewardMessage"></p>
+
 <script>
 let coins = Number(localStorage.getItem("tapverse_coins")) || 0;
+
 let savedEnergy = localStorage.getItem("tapverse_energy");
 let energy = savedEnergy === null ? 100 : Number(savedEnergy);
+
 let level = Number(localStorage.getItem("tapverse_upgrade")) || 0;
+
+let lastReward = localStorage.getItem("tapverse_daily_reward") || "";
 
 const maxEnergy = 100;
 
+function today() {
+  let d = new Date();
+  return d.getFullYear() + "-" +
+    (d.getMonth() + 1) + "-" + d.getDate();
+}
+
 function upgradeCost() {
   return 50 * Math.pow(2, level);
+}
+
+function save() {
+  localStorage.setItem("tapverse_coins", coins);
+  localStorage.setItem("tapverse_energy", energy);
+  localStorage.setItem("tapverse_upgrade", level);
+  localStorage.setItem("tapverse_daily_reward", lastReward);
 }
 
 function update() {
@@ -86,35 +121,57 @@ function update() {
   document.getElementById("level").innerText = level;
   document.getElementById("power").innerText = level + 1;
   document.getElementById("cost").innerText = upgradeCost();
-  document.getElementById("energyBar").style.width = energy + "%";
-  document.getElementById("tapButton").disabled = energy <= 0;
-}
 
-function save() {
-  localStorage.setItem("tapverse_coins", coins);
-  localStorage.setItem("tapverse_energy", energy);
-  localStorage.setItem("tapverse_upgrade", level);
+  document.getElementById("energyBar").style.width =
+    energy + "%";
+
+  document.getElementById("tapButton").disabled =
+    energy <= 0;
+
+  let claimed = lastReward === today();
+
+  document.getElementById("rewardButton").disabled = claimed;
+
+  document.getElementById("rewardMessage").innerText =
+    claimed ? "Today's reward already claimed!" :
+    "Your daily reward is ready!";
 }
 
 function tap() {
   if (energy <= 0) return;
+
   coins += level + 1;
   energy--;
+
   save();
   update();
 }
 
 function upgrade() {
   let cost = upgradeCost();
+
   if (coins < cost) {
     alert("Not enough coins!");
     return;
   }
+
   coins -= cost;
   level++;
+
   save();
   update();
   alert("Upgrade successful!");
+}
+
+function claimReward() {
+  if (lastReward === today()) return;
+
+  coins += 100;
+  lastReward = today();
+
+  save();
+  update();
+  alert("100 Coins added!");
 }
 
 setInterval(function() {
